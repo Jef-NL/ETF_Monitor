@@ -1,0 +1,20 @@
+etfs:
+  - name: FTSE All-World
+    isin: IE00B3RBWM25
+    transactions:
+      - amount: 5
+        purchase_price: 115.62
+      - amount: 24
+        purchase_price: 102.82
+  - name: MSCI Europe
+    isin: LU0274209237
+    transactions:
+      - amount: 8
+        purchase_price: 80.64
+        purchase_date: 18-01-2024
+      - amount: 15
+        purchase_price: 80.97
+        purchase_date: 12-12-2023
+      - amount: 3
+        purchase_price: 75.95
+        purchase_date: 6-11-2023

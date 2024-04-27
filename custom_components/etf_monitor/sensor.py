@@ -19,6 +19,7 @@ from .const import (
     ASSET_LIST_TOP_FIELD,
     CONF_FILE_OPTION_FIELD,
     CONF_FOLDER,
+    DEFAULT_CONFIG_NAME,
     DEFAULT_POLLING_RATE_S,
     DOMAIN,
     MIN_POLLING_RATE_S,
@@ -40,12 +41,12 @@ async def async_setup_platform(
 
     # Load ETFs from the configuration file
     etf_conf = {}
-    if (conf_path := config.get(CONF_FILE_OPTION_FIELD, None)) is not None:
-        if os.path.exists(conf_path):
-            etf_conf = load_yaml_dict(f"{CONF_FOLDER}/{conf_path}")
-            _logger.info("Loaded configuration: %s", etf_conf)
-        else:
-            save_yaml(conf_path, {ASSET_LIST_TOP_FIELD: []})
+    conf_path = config.get(CONF_FILE_OPTION_FIELD, DEFAULT_CONFIG_NAME)
+    if os.path.exists(conf_path):
+        etf_conf = load_yaml_dict(f"{CONF_FOLDER}/{conf_path}")
+        _logger.info("Loaded configuration: %s", etf_conf)
+    else:
+        save_yaml(conf_path, {ASSET_LIST_TOP_FIELD: []})
 
     # Create entry per ETF
     entries = await ETFList.entries_from_dict(etf_conf)
@@ -92,7 +93,9 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        # _logger.info("Value %s %f", self.entity_id, self.coordinator.data[self.idx])
+        _logger.debug(
+            "Value update for %s : %f", self.entity_id, self.coordinator.data[self.idx]
+        )
 
         self._state_value = self.coordinator.data.get(self.idx, 0)
         self.async_write_ha_state()
@@ -115,7 +118,7 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
     @property
     def unique_id(self):
         """Entity unique ID."""
-        return self._etf_entry.isn
+        return self._etf_entry.isin
 
 
 class CalculateSensorEntity(SensorEntity):
@@ -185,4 +188,4 @@ class CalculateSensorEntity(SensorEntity):
     @property
     def unique_id(self):
         """Entity unique ID."""
-        return f"{self._etf_entry.isn}_gain"
+        return f"{self._etf_entry.isin}_gain"

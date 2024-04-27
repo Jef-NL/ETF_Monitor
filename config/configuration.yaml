@@ -1,0 +1,36 @@
+################# ( Default config) #################
+# Loads default set of integrations. Do not remove.
+#####################################################
+default_config:
+
+
+
+################# ( ETF Monitor Config) #################
+# Add the sensor to the configuration with the platform etf_monitor
+# Fields:
+#   - platform    :   etf_monitor
+#   - name        :   Name of the integration (optional)
+#   - config      :   Name of configuration file located in the config folder (required)
+#   - update_rate :   Pull rate in seconds, min is 60 seconds (optional, default 300s)
+#########################################################
+sensor:
+  - platform: etf_monitor
+    name: "ETF Sens"
+    config: "etf_tracker.yaml"
+
+
+
+################# ( Default config) #################
+# Load frontend themes from the themes folder
+#####################################################
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+logger:
+  default: info
+  logs:
+    homeassistant.components.cloud: debug

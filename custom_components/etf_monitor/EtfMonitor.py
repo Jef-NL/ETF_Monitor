@@ -44,7 +44,7 @@ class ETFEntry:
     """Single ETF entry."""
 
     name: str
-    isn: str
+    isin: str
     transactions: list[ETFTransaction]
     current_price: float = 0
 
@@ -66,7 +66,7 @@ class ETFEntry:
     async def get_current_value(self, hass: HomeAssistant) -> float:
         """Pull the current value of the ETF from the API."""
         response = await hass.async_add_executor_job(
-            requests.get, API_BASE_URL + self.isn + API_CHART_SETTINGS
+            requests.get, API_BASE_URL + self.isin + API_CHART_SETTINGS
         )
 
         if response.ok:
@@ -92,7 +92,7 @@ class ETFEntry:
     async def entry_from_dict(cls, data: dict):
         """Parse entries from the dictionairy."""
         name = data.get(ASSET_NAME_FIELD)
-        isn = data.get(ASSET_ID_FIELD)
+        isin = data.get(ASSET_ID_FIELD)
         entries = data.get(ASSET_HISTORY_FIELD)
         if entries is None:
             return cls
@@ -101,7 +101,7 @@ class ETFEntry:
         for entry in entries:
             etf_transaction = await ETFTransaction.entries_from_dict(entry)
             transaction_list.append(etf_transaction)
-        return cls(name=name, isn=isn, transactions=transaction_list)
+        return cls(name=name, isin=isin, transactions=transaction_list)
 
 
 @dataclass

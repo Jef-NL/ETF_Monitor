@@ -39,7 +39,7 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
                     data_frame[entry.name] = await entry.get_current_value(self.hass)
             except ValueError:
                 self.logger.error(
-                    "ETF API call for %s returned an error. Check the ISN of '%s' in the configuration.",
+                    "ETF API call for %s returned an error. Check the ISIN of '%s' in the configuration.",
                     entry.name,
                     entry.name,
                 )
