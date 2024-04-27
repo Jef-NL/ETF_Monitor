@@ -1,0 +1,12 @@
+{
+  "domain": "etf_monitor",
+  "name": "ETF motitoring",
+  "codeowners": ["@Jef_NL"],
+  "config_flow": false,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/etf_monitor",
+  "homekit": {},
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.0.1"
+}
