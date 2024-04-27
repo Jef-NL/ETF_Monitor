@@ -18,7 +18,6 @@ from homeassistant.util.yaml import load_yaml_dict, save_yaml
 from .const import (
     ASSET_LIST_TOP_FIELD,
     CONF_FILE_OPTION_FIELD,
-    CONF_FOLDER,
     DEFAULT_CONFIG_NAME,
     DEFAULT_POLLING_RATE_S,
     DOMAIN,
@@ -41,14 +40,17 @@ async def async_setup_platform(
 
     # Load ETFs from the configuration file
     etf_conf = {}
-    conf_path = config.get(CONF_FILE_OPTION_FIELD, DEFAULT_CONFIG_NAME)
-    if os.path.exists(f"{CONF_FOLDER}/{conf_path}"):
-        etf_conf = load_yaml_dict(f"{CONF_FOLDER}/{conf_path}")
+    conf_path = hass.config.path(
+        config.get(CONF_FILE_OPTION_FIELD, DEFAULT_CONFIG_NAME)
+    )
+    if os.path.exists(conf_path):
+        etf_conf = load_yaml_dict(conf_path)
         _logger.info("Loaded configuration: %s", etf_conf)
     else:
         save_yaml(conf_path, {ASSET_LIST_TOP_FIELD: []})
         _logger.warning(
-            "ETF Configuration was not found. Created a new configuration to be filled. Not loaded the Integration."
+            "ETF Configuration was not found. Created a new configuration to be filled '%s'. Not loaded the Integration.",
+            conf_path,
         )
         return
 
