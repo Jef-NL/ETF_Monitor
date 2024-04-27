@@ -1,11 +1,12 @@
 HASS integration to track your ETF values and profits based of the [JustETF](https://www.justetf.com/en/) API[*](#important-notice).
 
 # ETF Monitor
-[![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]](LICENSE)
+![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/y/Jef-NL/ETF_Monitor/develop?style=for-the-badge)
+[![Static Badge](https://img.shields.io/badge/Apache%202.0-green?style=for-the-badge&label=LICENSE&color=orange)](LICENSE)
 
-![Project Maintenance][maintenance-shield]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
+![Static Badge](https://img.shields.io/badge/Actively%20Developed-green?style=for-the-badge&label=Maintenance&color=green)
+[![Static Badge](https://img.shields.io/badge/DONATE-BUY%20ME%20A%20COFFEE?style=for-the-badge&label=BUY%20ME%20A%20COFFEE&color=yellow&link=https%3A%2F%2Fbuymeacoffee.com%2Ftheboomnlu%3Fnew%3D1)](https://buymeacoffee.com/theboomnlu)
+
 
 ## Installation
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
