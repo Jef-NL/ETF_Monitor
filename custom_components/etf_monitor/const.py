@@ -1,7 +1,7 @@
 """Constants for the ETF motitoring integration."""
 
 DOMAIN = "etf_monitor"
-CONF_FOLDER = "config"
+CONF_FOLDER = ""
 
 # Integration config options
 CONF_FILE_OPTION_FIELD = "config"
