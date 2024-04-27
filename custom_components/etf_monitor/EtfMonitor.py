@@ -115,7 +115,7 @@ class ETFList:
         """Parse entries from the dictionairy."""
         entries = data.get(ASSET_LIST_TOP_FIELD)
         if entries is None:
-            return cls
+            return cls(etfs=[])
 
         entry_list = []
         for entry in entries:
