@@ -100,6 +100,8 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
         self._state_value: float = self.coordinator.data.get(self.idx, 0)
 
     async def async_added_to_hass(self) -> None:
+        """Assign entity ID to the ETF entry."""
+        await super().async_added_to_hass()  # Used by coordinator
         self._etf_entry.entity_id = self.entity_id
 
     @callback
@@ -108,10 +110,8 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
         _logger.debug(
             "Value update for %s : %f", self.entity_id, self.coordinator.data[self.idx]
         )
-
         self._state_value = self.coordinator.data.get(self.idx, 0)
         self.async_write_ha_state()
-        print(self._etf_entry.transactions)
 
     @property
     def name(self):

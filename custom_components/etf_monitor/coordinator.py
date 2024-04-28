@@ -75,3 +75,5 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
                         amount=amount, purchase_price=price, purchase_date=date
                     )
                 )
+
+        # ToDo: Send update event to entities and write new data to file
