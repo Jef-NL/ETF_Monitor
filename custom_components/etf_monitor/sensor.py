@@ -10,7 +10,9 @@ from homeassistant.const import CURRENCY_EURO
 from homeassistant.core import Event, HomeAssistant, State, callback
 from homeassistant.exceptions import NoEntitySpecifiedError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_track_state_change_event
+from homeassistant.helpers.event import (
+    async_track_state_change_event,
+)
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util.yaml import load_yaml_dict, save_yaml
@@ -72,16 +74,19 @@ async def async_setup_platform(
     # Create the sensor entries
     sensor_entities = []
     for etf in entries.etfs:
-        sensor_entities.append(
-            MonitorSensorEntity(
-                coordinator=coordinator, idx=etf.name, name=etf.name, entry=etf
-            )
+        calculating_entity = CalculateSensorEntity(
+            hass=hass, name=etf.name + " Gain", entry=etf
         )
-        sensor_entities.append(
-            CalculateSensorEntity(
-                hass=hass, name=etf.name + " Gain", entry=etf, tracking=etf.name
-            )
+        monitoring_entity = MonitorSensorEntity(
+            coordinator=coordinator,
+            idx=etf.name,
+            name=etf.name,
+            entry=etf,
+            calc_entity=calculating_entity,
         )
+
+        sensor_entities.append(monitoring_entity)
+        sensor_entities.append(calculating_entity)
 
     # Add configured entities
     async_add_entities(sensor_entities)
@@ -90,19 +95,27 @@ async def async_setup_platform(
 class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
     """Live ETF monitoring sensor."""
 
-    def __init__(self, coordinator, idx, name: str, entry: ETFEntry) -> None:
+    def __init__(
+        self,
+        coordinator,
+        idx,
+        name: str,
+        entry: ETFEntry,
+        calc_entity: CalculateSensorEntity,
+    ) -> None:
         """Initialize etf_monitor Sensor."""
         super().__init__(coordinator, context=idx)
         self.idx = idx
         self._attr_name = name
         self._etf_entry = entry
-        self._attr_extra_state_attributes = entry.__dict__
         self._state_value: float = self.coordinator.data.get(self.idx, 0)
+        self._calc_entity = calc_entity
 
     async def async_added_to_hass(self) -> None:
         """Assign entity ID to the ETF entry."""
         await super().async_added_to_hass()  # Used by coordinator
         self._etf_entry.entity_id = self.entity_id
+        await self._set_extra_attributes()
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -111,7 +124,24 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
             "Value update for %s : %f", self.entity_id, self.coordinator.data[self.idx]
         )
         self._state_value = self.coordinator.data.get(self.idx, 0)
-        self.async_write_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
+
+    async def async_update(self) -> None:
+        """Update self and calculation entities."""
+        await super().async_update()
+        await self._set_extra_attributes()
+        await self._calc_entity.value_event(self._state_value)
+
+    async def _set_extra_attributes(self):
+        """Set extra state attribites."""
+        self._attr_extra_state_attributes = {
+            "name": self._etf_entry.name,
+            "ISIN": self._etf_entry.isin,
+            "transactions": [
+                {"Shares": t.amount, "Cost": round(t.purchase_price, 2)}
+                for t in self._etf_entry.transactions
+            ],
+        }
 
     @property
     def name(self):
@@ -137,36 +167,25 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
 class CalculateSensorEntity(SensorEntity):
     """Connected entity to the ETF, updating the depot status calculations."""
 
-    def __init__(
-        self, hass: HomeAssistant, name: str, entry: ETFEntry, tracking: str
-    ) -> None:
+    def __init__(self, hass: HomeAssistant, name: str, entry: ETFEntry) -> None:
         """Initialize etf_monitor Sensor."""
         super().__init__()
         self._attr_name = name
         self._etf_entry = entry
         self._state_value: float = 0.0
         self._unsub = None
-        self._tracking_entity = (
-            f"sensor.{tracking.lower().replace(' ', '_').replace('-', '_')}"
-        )
 
     async def async_added_to_hass(self) -> None:
         """Update attributes and link value events on add event."""
-        self._unsub = async_track_state_change_event(
-            hass=self.hass,
-            entity_ids=[self._tracking_entity],
-            action=self._value_event,
-        )
+        await super().async_added_to_hass()
         self._state_value = await self._etf_entry.calulate_gain()
         await self._set_extra_attributes()
 
-    async def _value_event(self, event: Event):
+    async def value_event(self, state_value: float):
         """Respond to Callback of entity on update."""
         try:
-            new_state: State = event.data["new_state"]
-            self._state_value = await self._etf_entry.calulate_gain(
-                float(new_state.state)
-            )
+            self._state_value = await self._etf_entry.calulate_gain(float(state_value))
+            await self._set_extra_attributes()
             self.async_write_ha_state()
         except NoEntitySpecifiedError:
             ...  # Ignore exceptions raised
@@ -180,7 +199,8 @@ class CalculateSensorEntity(SensorEntity):
         shares = await self._etf_entry.get_shares_amount()
         self._attr_extra_state_attributes = {
             "shares": shares,
-            "current_value": await self._etf_entry.get_shares_value(shares),
+            "purchase_value": round(await self._etf_entry.calculate_purchase_sum(), 2),
+            "current_value": round(await self._etf_entry.get_shares_value(shares), 2),
         }
 
     @property

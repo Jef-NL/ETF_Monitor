@@ -16,7 +16,7 @@ UPDATE_ITEMS_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): str,
         vol.Required("amount"): int,
-        vol.Required("price"): float,
+        vol.Required("price"): vol.Coerce(float),
         vol.Optional("date"): str,
     },
     # extra=vol.ALLOW_EXTRA,
@@ -63,17 +63,23 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
         return data_frame
 
     async def _service_callback(self, call: ServiceCall):
-        print(call)
+        found_macth = False
         amount = call.data.get("amount")
         price = call.data.get("price")
         date = call.data.get("date")
         for entry in self._entries.etfs:
             if entry.entity_id == call.data.get("entity_id"):
-                print("Match for", entry.name)
+                found_macth = True
                 entry.transactions.append(
                     ETFTransaction(
                         amount=amount, purchase_price=price, purchase_date=date
                     )
                 )
 
-        # ToDo: Send update event to entities and write new data to file
+        if not found_macth:
+            raise ValueError(
+                f"Failed to purchase for Entity '{call.data.get('entity_id')}'"
+            )
+
+        # ToDo: write new data to file
+        self.async_update_listeners()
