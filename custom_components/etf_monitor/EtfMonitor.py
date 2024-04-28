@@ -47,6 +47,7 @@ class ETFEntry:
     isin: str
     transactions: list[ETFTransaction]
     current_price: float = 0
+    entity_id: str = ""
 
     async def calculate_purchase_sum(self):
         """Calculate the total purchase value of the ETF history."""

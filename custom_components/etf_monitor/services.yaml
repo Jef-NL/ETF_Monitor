@@ -1,0 +1,32 @@
+update_etf:
+  name: "Purchase ETF"
+  fields:
+    entity_id:
+      name: "Select ETF to Purchase"
+      description: "Select one of the ETF entities to purchase more of."
+      required: True
+      selector:
+        entity:
+          filter:
+            domain: sensor
+            integration: etf_monitor
+          multiple: False
+    amount:
+      required: True
+      example: 10
+      default: 0
+      selector:
+        number:
+          min: 0
+    price:
+      required: True
+      example: 55.6
+      default: 0.0
+      selector:
+        number:
+          min: 0.0
+    date:
+      required: False
+      example: "2024-02-22"
+      selector:
+        date:

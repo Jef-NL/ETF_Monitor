@@ -99,6 +99,9 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
         self._attr_extra_state_attributes = entry.__dict__
         self._state_value: float = self.coordinator.data.get(self.idx, 0)
 
+    async def async_added_to_hass(self) -> None:
+        self._etf_entry.entity_id = self.entity_id
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
@@ -108,6 +111,7 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
 
         self._state_value = self.coordinator.data.get(self.idx, 0)
         self.async_write_ha_state()
+        print(self._etf_entry.transactions)
 
     @property
     def name(self):

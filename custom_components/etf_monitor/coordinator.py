@@ -4,11 +4,23 @@ from datetime import timedelta
 import logging
 
 import async_timeout  # noqa: TID251
+import voluptuous as vol
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .EtfMonitor import ETFList
+from .const import DOMAIN
+from .EtfMonitor import ETFList, ETFTransaction
+
+UPDATE_ITEMS_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): str,
+        vol.Required("amount"): int,
+        vol.Required("price"): float,
+        vol.Optional("date"): str,
+    },
+    # extra=vol.ALLOW_EXTRA,
+)
 
 
 class ETFUpdateCoordinator(DataUpdateCoordinator):
@@ -30,6 +42,10 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
         )
         self._entries = entries
 
+        hass.services.async_register(
+            DOMAIN, "update_etf", self._service_callback, schema=UPDATE_ITEMS_SCHEMA
+        )
+
     async def _async_update_data(self):
         self.logger.info("Polling JustETF API for assets")
         data_frame = {}
@@ -45,3 +61,17 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
                 )
                 self._entries.etfs.remove(entry)  # Kick entry from list
         return data_frame
+
+    async def _service_callback(self, call: ServiceCall):
+        print(call)
+        amount = call.data.get("amount")
+        price = call.data.get("price")
+        date = call.data.get("date")
+        for entry in self._entries.etfs:
+            if entry.entity_id == call.data.get("entity_id"):
+                print("Match for", entry.name)
+                entry.transactions.append(
+                    ETFTransaction(
+                        amount=amount, purchase_price=price, purchase_date=date
+                    )
+                )
