@@ -5,9 +5,9 @@
   "config_flow": false,
   "dependencies": [],
   "documentation": "https://github.com/Jef-NL/ETF_Monitor",
-  "issue_tracker": "https://github.com/Jef-NL/ETF_Monitor/issues",
   "homekit": {},
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/Jef-NL/ETF_Monitor/issues",
   "requirements": [],
   "version": "0.0.1"
 }
