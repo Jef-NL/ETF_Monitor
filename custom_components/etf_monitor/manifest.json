@@ -1,0 +1,13 @@
+{
+  "domain": "etf_monitor",
+  "name": "ETF motitoring",
+  "codeowners": ["@Jef_NL"],
+  "config_flow": false,
+  "dependencies": [],
+  "documentation": "https://github.com/Jef-NL/ETF_Monitor",
+  "homekit": {},
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/Jef-NL/ETF_Monitor/issues",
+  "requirements": [],
+  "version": "0.0.1"
+}
