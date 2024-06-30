@@ -29,8 +29,15 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=poll_interval),
         )
         self._entries = entries
+        self._startup = True
 
     async def _async_update_data(self):
+        # Do not poll outside of market hours
+        if await self._entries.in_trading_hours() is False and not self._startup:
+            self.logger.info("Outside of trading hours")
+            return None
+        self._startup = False
+
         self.logger.info("Polling JustETF API for assets")
         data_frame = {}
         for entry in self._entries.etfs:
@@ -44,4 +51,9 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
                     entry.name,
                 )
                 self._entries.etfs.remove(entry)  # Kick entry from list
+            except ConnectionAbortedError:
+                self.logger.warning(
+                    "ETF API call for %s returned no correct response. Ignored for now.",
+                    entry.name,
+                )
         return data_frame
