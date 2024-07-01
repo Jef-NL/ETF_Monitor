@@ -133,7 +133,7 @@ class ETFList:
     @staticmethod
     async def in_trading_hours() -> bool:
         """Market opening hours getter."""
-        now = datetime.now(tz=UTC)
+        now = datetime.now()
         return (
             MARKET_OPEN_HOUR <= now.hour < MARKET_CLOSE_HOUR
             and now.weekday() < MARKET_WORKDAYS
