@@ -52,7 +52,7 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
                 )
                 self._entries.etfs.remove(entry)  # Kick entry from list
             except ConnectionAbortedError:
-                self.logger.warning(
+                self.logger.error(
                     "ETF API call for %s returned no correct response. Ignored for now.",
                     entry.name,
                 )
