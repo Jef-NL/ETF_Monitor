@@ -102,8 +102,13 @@ class MonitorSensorEntity(CoordinatorEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
+        if not self.coordinator.data or self.coordinator.data is None:
+            return  # No valid data, skipping the update
+
         _logger.debug(
-            "Value update for %s : %f", self.entity_id, self.coordinator.data[self.idx]
+            "Value update for %s : %f",
+            self.entity_id,
+            self.coordinator.data.get(self.idx, None),
         )
 
         self._state_value = self.coordinator.data.get(self.idx, 0)

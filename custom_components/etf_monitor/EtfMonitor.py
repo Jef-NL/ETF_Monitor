@@ -1,6 +1,7 @@
 """ETF data structure definition."""
 
 from dataclasses import dataclass
+from datetime import datetime, UTC
 import json
 
 import requests
@@ -19,6 +20,10 @@ from .const import (
 
 API_BASE_URL = "https://www.justetf.com/api/etfs/"
 API_CHART_SETTINGS = "/performance-chart?locale=en&currency=EUR&valuesType=MARKET_VALUE&reduceData=true&includeDividends=true&period=D1"
+
+MARKET_OPEN_HOUR = 8
+MARKET_CLOSE_HOUR = 22
+MARKET_WORKDAYS = 5
 
 
 @dataclass
@@ -74,7 +79,9 @@ class ETFEntry:
             self.current_price = float(data["series"][-1]["value"]["localized"])
             return self.current_price
 
-        raise ValueError("Bad ETF Update Request.")
+        if "RESOURCE_NOT_FOUND" in response.text:
+            raise ValueError("Bad ETF Update Request.")
+        raise ConnectionAbortedError("Failed to get ETF data")
 
     async def get_shares_amount(self) -> float:
         """Get the total owned shares."""
@@ -122,3 +129,12 @@ class ETFList:
             etf_entry = await ETFEntry.entry_from_dict(entry)
             entry_list.append(etf_entry)
         return cls(etfs=entry_list)
+
+    @staticmethod
+    async def in_trading_hours() -> bool:
+        """Market opening hours getter."""
+        now = datetime.now()
+        return (
+            MARKET_OPEN_HOUR <= now.hour < MARKET_CLOSE_HOUR
+            and now.weekday() < MARKET_WORKDAYS
+        )
