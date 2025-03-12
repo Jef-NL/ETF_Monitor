@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime, UTC
-import json
+import xmltodict, json
 
 import requests
 
@@ -79,8 +79,9 @@ class ETFEntry:
         )
 
         if response.ok:
-            data = json.loads(response.text)
-            self.current_price = float(data["series"][-1]["value"]["localized"])
+            # data = json.loads(response.text) # Outdated, changed on 12-3-2025 from JSON to XML {data["series"][-1]["value"]["localized"]}
+            data = xmltodict.parse(result.text)
+            self.current_price = float(data['ETFPerformanceChartResponse']['series']['series'][-1]['value']['localized'])
             return self.current_price
 
         if "RESOURCE_NOT_FOUND" in response.text:
