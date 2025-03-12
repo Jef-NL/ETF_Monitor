@@ -80,7 +80,7 @@ class ETFEntry:
 
         if response.ok:
             # data = json.loads(response.text) # Outdated, changed on 12-3-2025 from JSON to XML {data["series"][-1]["value"]["localized"]}
-            data = xmltodict.parse(result.text)
+            data = xmltodict.parse(response.text)
             self.current_price = float(data['ETFPerformanceChartResponse']['series']['series'][-1]['value']['localized'])
             return self.current_price
 
