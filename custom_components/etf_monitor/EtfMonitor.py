@@ -76,7 +76,9 @@ class ETFEntry:
     async def get_current_value(self, hass: HomeAssistant) -> float:
         """Pull the current value of the ETF from the API."""
         response = await hass.async_add_executor_job(
-            requests.get, API_BASE_URL + self.isin + API_CHART_SETTINGS, headers=API_REQ_HEADERS
+            requests.get, API_BASE_URL + self.isin + API_CHART_SETTINGS, 
+            None, 
+            API_REQ_HEADERS
         )
 
         if response.ok:
