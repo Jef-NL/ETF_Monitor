@@ -20,6 +20,11 @@ from .const import (
 
 API_BASE_URL = "https://www.justetf.com/api/etfs/"
 API_CHART_SETTINGS = "/performance-chart?locale=en&currency=EUR&valuesType=MARKET_VALUE&reduceData=true&includeDividends=true&period=D1"
+API_REQ_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", 
+    "Accept-Language": "en-US,en;q=0.5",
+}
 
 MARKET_OPEN_HOUR = 8
 MARKET_CLOSE_HOUR = 22
@@ -71,7 +76,7 @@ class ETFEntry:
     async def get_current_value(self, hass: HomeAssistant) -> float:
         """Pull the current value of the ETF from the API."""
         response = await hass.async_add_executor_job(
-            requests.get, API_BASE_URL + self.isin + API_CHART_SETTINGS
+            requests.get, API_BASE_URL + self.isin + API_CHART_SETTINGS, headers=API_REQ_HEADERS
         )
 
         if response.ok:
