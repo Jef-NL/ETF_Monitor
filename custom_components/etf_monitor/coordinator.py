@@ -44,16 +44,18 @@ class ETFUpdateCoordinator(DataUpdateCoordinator):
             try:
                 with async_timeout.timeout(10):
                     data_frame[entry.name] = await entry.get_current_value(self.hass)
-            except ValueError:
+            except ValueError as err:
                 self.logger.error(
-                    "ETF API call for %s returned an error. Check the ISIN of '%s' in the configuration.",
+                    "ETF API call for %s returned an error. Check the ISIN of '%s' in the configuration. Err: %s",
                     entry.name,
                     entry.name,
+                    err
                 )
                 self._entries.etfs.remove(entry)  # Kick entry from list
-            except ConnectionAbortedError:
+            except ConnectionAbortedError as err:
                 self.logger.error(
-                    "ETF API call for %s returned no correct response. Ignored for now.",
+                    "ETF API call for %s returned no correct response. Ignored for now.  Err: %s",
                     entry.name,
+                    err
                 )
         return data_frame
